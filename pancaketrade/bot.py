@@ -345,7 +345,7 @@ class TradeBot:
             price_diff_percent = ((token_price / token.effective_buy_price) - Decimal(1)) * Decimal(100)
             diff_icon = '🆙' if price_diff_percent >= 0 else '🔽'
             effective_buy_price = (
-                f'<b>At buy (after tax)</b>: <code>{token.effective_buy_price:.3g}</code> BNB/token '
+                f'<b>At buy (after tax)</b>: <code>{token.effective_buy_price:.3g}</code> BNBUSD/Token '
                 + f'(now {price_diff_percent:+.1f}% {diff_icon})\n'
             )
         orders_sorted = sorted(
@@ -355,8 +355,8 @@ class TradeBot:
         message = (
             f'<b>{token.name}</b>: {format_token_amount(token_balance)}\n'
             + f'<b>Links</b>: {"    ".join(chart_links)}\n'
-            + f'<b>Value</b>: <code>{token_balance_bnb:.3g}</code> BNB (${token_balance_usd:.2f})\n'
-            + f'<b>Price</b>: <code>{token_price:.3g}</code> BNB/token (${token_price_usd:.3g})\n'
+            + f'<b>Value</b>: <code>{token_balance_bnb:.3g}</code> BNBUSD(${token_balance_usd:.2f})\n'
+            + f'<b>Price</b>: <code>{token_price:.3g}</code> BNBUSD/Token (${token_price_usd:.3g})\n'
             + effective_buy_price
             + '<b>Orders</b>: (underlined = tracking trailing stop loss)\n'
             + '\n'.join(orders)
@@ -369,11 +369,11 @@ class TradeBot:
         total_positions = sum(token_balances)
         grand_total = balance_bnb + total_positions
         msg = (
-            f'<b>BNB balance</b>: <code>{balance_bnb:.4f}</code> BNB (${balance_bnb * price_bnb:.2f})\n'
-            + f'<b>Tokens balance</b>: <code>{total_positions:.4f}</code> BNB (${total_positions * price_bnb:.2f})\n'
-            + f'<b>Total</b>: <code>{grand_total:.4f}</code> BNB (${grand_total * price_bnb:.2f}) '
+            f'<b>BUSD balance</b>: <code>{balance_bnb:.4f}</code> BUSD (${balance_bnb * price_bnb:.2f})\n'
+            + f'<b>Tokens balance</b>: <code>{total_positions:.4f}</code> BUSD (${total_positions * price_bnb:.2f})\n'
+            + f'<b>Total</b>: <code>{grand_total:.4f}</code> BUSD (${grand_total * price_bnb:.2f}) '
             + f'<a href="https://bscscan.com/address/{self.net.wallet}">BscScan</a>\n'
-            + f'<b>BNB price</b>: ${price_bnb:.2f}\n'
+            + f'<b>BUSD price</b>: ${price_bnb:.2f}\n'
             + 'Which action do you want to perform next?'
         )
         return msg, self.get_global_keyboard()

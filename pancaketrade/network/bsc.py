@@ -20,7 +20,8 @@ GAS_LIMIT_FAILSAFE = Wei(2000000)  # if the estimated limit is above this one, d
 
 
 class NetworkAddresses(NamedTuple):
-    wbnb: ChecksumAddress = Web3.toChecksumAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c')
+    ibnb: ChecksumAddress = Web3.toChecksumAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c')
+    wbnb: ChecksumAddress = Web3.toChecksumAddress('0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56')
     busd: ChecksumAddress = Web3.toChecksumAddress('0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56')
     factory_v1: ChecksumAddress = Web3.toChecksumAddress('0xBCfCcbde45cE874adCB698cC183deBcF17952812')
     factory_v2: ChecksumAddress = Web3.toChecksumAddress('0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73')
@@ -31,6 +32,7 @@ class NetworkAddresses(NamedTuple):
 class NetworkContracts:
     wbnb: Contract
     busd: Contract
+    ibnb: Contract
     factory_v1: Contract
     factory_v2: Contract
     router_v1: Contract
@@ -324,9 +326,11 @@ class Network:
         v2: bool = True,
     ) -> Tuple[bool, Decimal, str]:
         balance_bnb = self.w3.eth.get_balance(self.wallet)
-        if amount_bnb > balance_bnb - Wei(2000000000000000):  # leave 0.002 BNB for future gas fees
-            logger.error('Not enough BNB balance')
-            return False, Decimal(0), 'Not enough BNB balance'
+        balance_busd = self.contracts.wbnb.functions.balanceOf(self.wallet).call()
+        logger.error(balance_busd)
+        #if amount_bnb > balance_bnb - Wei(1000000000000000):  # leave 0.002 BNB for future gas fees
+        #    logger.error('Not enough BNB balance')
+        #    return False, Decimal(0), 'Not enough BNB balance'
         slippage_ratio = (Decimal(100) - slippage_percent) / Decimal(100)
         final_gas_price = self.w3.eth.gas_price
         if gas_price is not None and gas_price.startswith('+'):
@@ -335,11 +339,11 @@ class Network:
         elif gas_price is not None:
             final_gas_price = Web3.toWei(gas_price, unit='wei')
         router_contract = self.contracts.router_v2 if v2 else self.contracts.router_v1
-        predicted_out = router_contract.functions.getAmountsOut(amount_bnb, [self.addr.wbnb, token_address]).call()[-1]
+        predicted_out = router_contract.functions.getAmountsOut(balance_busd, [self.addr.wbnb, token_address]).call()[-1]
         min_output_tokens = Web3.toWei(slippage_ratio * predicted_out, unit='wei')
         receipt = self.buy_tokens_with_params(
             token_address=token_address,
-            amount_bnb=amount_bnb,
+            amount_bnb=balance_busd,
             min_output_tokens=min_output_tokens,
             gas_price=final_gas_price,
             v2=v2,
@@ -375,18 +379,24 @@ class Network:
         gas_price: Wei,
         v2: bool,
     ) -> Optional[TxReceipt]:
+        balance_bnb = self.w3.eth.get_balance(self.wallet)
         router_contract = self.contracts.router_v2 if v2 else self.contracts.router_v1
-        func = router_contract.functions.swapExactETHForTokensSupportingFeeOnTransferTokens(
-            min_output_tokens, [self.addr.wbnb, token_address], self.wallet, self.deadline(60)
+        logger.error(amount_bnb)
+        logger.error(min_output_tokens)
+        logger.success(gas_price)
+        func = router_contract.functions.swapExactTokensForTokens(
+           amount_bnb, min_output_tokens, [self.addr.wbnb, token_address], self.wallet, self.deadline(60)
         )
         try:
-            gas_limit = Wei(int(Decimal(func.estimateGas({'from': self.wallet, 'value': amount_bnb})) * Decimal(1.2)))
+            #gas_limit = Wei(int(Decimal(func.estimateGas({'from': self.wallet, 'value': balance_bnb})) * Decimal(1.2)))
+            gas_limit = Wei(int(Decimal(func.estimateGas({'from': self.wallet, 'value': Wei(0)})) * Decimal(1.2)))
+            logger.success(gas_limit);
         except Exception as e:
             logger.error(f'Can\'t get gas estimate, cancelling transaction: {e}')
             return None
         if gas_limit > GAS_LIMIT_FAILSAFE:
             gas_limit = GAS_LIMIT_FAILSAFE
-        params = self.get_tx_params(value=amount_bnb, gas=gas_limit, gas_price=gas_price)
+        params = self.get_tx_params(value=Wei(0), gas=gas_limit, gas_price=gas_price)
         tx = self.build_and_send_tx(func=func, tx_params=params)
         return self.w3.eth.wait_for_transaction_receipt(tx, timeout=60)
 
@@ -451,7 +461,7 @@ class Network:
         v2: bool,
     ) -> Optional[TxReceipt]:
         router_contract = self.contracts.router_v2 if v2 else self.contracts.router_v1
-        func = router_contract.functions.swapExactTokensForETHSupportingFeeOnTransferTokens(
+        func = router_contract.functions.swapExactTokensForTokens(
             amount_tokens, min_output_bnb, [token_address, self.addr.wbnb], self.wallet, self.deadline(60)
         )
         try:
