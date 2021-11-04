@@ -345,7 +345,7 @@ class TradeBot:
             price_diff_percent = ((token_price / token.effective_buy_price) - Decimal(1)) * Decimal(100)
             diff_icon = '🆙' if price_diff_percent >= 0 else '🔽'
             effective_buy_price = (
-                f'<b>At buy (after tax)</b>: <code>{token.effective_buy_price:.3g}</code> BNBUSD/Token '
+                f'<b>At buy (after tax)</b>: <code>{token.effective_buy_price:.4f}</code> RUSDBUSD/Token '
                 + f'(now {price_diff_percent:+.1f}% {diff_icon})\n'
             )
         orders_sorted = sorted(
@@ -355,8 +355,8 @@ class TradeBot:
         message = (
             f'<b>{token.name}</b>: {format_token_amount(token_balance)}\n'
             + f'<b>Links</b>: {"    ".join(chart_links)}\n'
-            + f'<b>Value</b>: <code>{token_balance_bnb:.3g}</code> BNBUSD(${token_balance_usd:.2f})\n'
-            + f'<b>Price</b>: <code>{token_price:.3g}</code> BNBUSD/Token (${token_price_usd:.3g})\n'
+            + f'<b>Value</b>: <code>{token_balance_bnb:.4f}</code> RUSDBUSD\n'
+            + f'<b>Price</b>: <code>{token_price:.3g}</code> RUSD-BUSD/Token\n'
             + effective_buy_price
             + '<b>Orders</b>: (underlined = tracking trailing stop loss)\n'
             + '\n'.join(orders)
