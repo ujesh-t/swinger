@@ -54,7 +54,7 @@ Run the following commands
 
 ```bash
 git clone https://github.com/ujesh-t/swinger.git
-cd pancaketrade
+cd swinger
 poetry install --no-dev
 cp user_data/config.example.yml user_data/config.yml
 ```
