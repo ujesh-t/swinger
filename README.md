@@ -53,7 +53,7 @@ bot the first time.
 Run the following commands
 
 ```bash
-git clone https://github.com/beeb/pancaketrade.git
+git clone https://github.com/ujesh-t/swinger.git
 cd pancaketrade
 poetry install --no-dev
 cp user_data/config.example.yml user_data/config.yml
