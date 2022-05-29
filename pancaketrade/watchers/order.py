@@ -184,8 +184,8 @@ class OrderWatcher:
                 chat_id=self.chat_id,
                 text=f'⛔️ <u>Transaction failed:</u> {txhash_or_error}\n' + 'Order below deleted:\n' + self.long_str(),
             )
-            self.remove_order()
-            self.finished = True  # will trigger deletion of the object
+            # self.remove_order()
+            # self.finished = True  # will trigger deletion of the object
             return
         effective_price = self.get_human_amount() / tokens_out
         db.connect()
@@ -261,8 +261,8 @@ class OrderWatcher:
                 chat_id=self.chat_id,
                 text=f'⛔️ <u>Transaction failed:</u> {reason_or_link}\n' + 'Order below deleted.\n' + self.long_str(),
             )
-            self.remove_order()
-            self.finished = True  # will trigger deletion of the object
+            # self.remove_order()
+            # self.finished = True  # will trigger deletion of the object
             return
         effective_price = bnb_out / self.get_human_amount()
         sold_proportion = self.amount / balance_before
